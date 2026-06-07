@@ -70,7 +70,7 @@ customer-churn-prediction/
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/keshavkashyap/customer-churn-prediction.git
+git clone https://github.com/realkeshav08/customer-churn-prediction.git
 cd customer-churn-prediction
 python -m venv .venv
 # Windows:
@@ -101,6 +101,19 @@ jupyter notebook
 | 2 | `notebooks/02_feature_engineering.ipynb` | Engineer 25+ features |
 | 3 | `notebooks/03_modeling.ipynb` | Train 3 models, evaluate, export Tableau data |
 | 4 | `notebooks/04_sql_analysis.ipynb` | 8 SQL queries on SQLite |
+
+### Or reproduce everything in one command
+
+Prefer not to run notebooks? The entire pipeline (preprocessing → 20+ figures →
+feature engineering → model training → Tableau export → SQL analysis) runs
+end-to-end and self-validates with assertions:
+
+```bash
+python run_pipeline.py
+```
+
+> **Note:** Trained models are loaded with `joblib`/pickle. Only load `.pkl` files
+> you generated yourself — never load model files from an untrusted source.
 
 ---
 
@@ -170,9 +183,8 @@ See [`tableau/README.md`](tableau/README.md) for complete step-by-step instructi
 4. Predictive Risk Segments (scatter plot with probability vs charges)
 5. Retention Strategy Dashboard (combined + global filters)
 
-*Dashboard preview placeholder — replace with screenshot after building in Tableau.*
-
-![Dashboard Preview](reports/figures/dashboard_preview_placeholder.png)
+> 🔗 **Live dashboard:** _Coming soon — Tableau Public link will be added here once published._
+> Add a screenshot to `reports/figures/` and embed it here after building the dashboard.
 
 ---
 
@@ -196,7 +208,7 @@ See [`tableau/README.md`](tableau/README.md) for complete step-by-step instructi
 
 **Keshav Kashyap**  
 B.Tech — Indian Institute of Information Technology, Kota  
-[GitHub](https://github.com/keshavkashyap) | [LinkedIn](https://linkedin.com/in/keshavkashyap) | asuskeshavkashyap@gmail.com
+[GitHub](https://github.com/realkeshav08) | [LinkedIn](https://linkedin.com/in/keshavkashyap) | asuskeshavkashyap@gmail.com
 
 ---
 
