@@ -208,7 +208,7 @@ See [`tableau/README.md`](tableau/README.md) for complete step-by-step instructi
 
 **Keshav Kashyap**  
 B.Tech — Indian Institute of Information Technology, Kota  
-[GitHub](https://github.com/realkeshav08) | [LinkedIn](https://linkedin.com/in/keshavkashyap) | asuskeshavkashyap@gmail.com
+[GitHub](https://github.com/realkeshav08) | [LinkedIn](https://www.linkedin.com/in/keshav-kashyap08/) | asuskeshavkashyap@gmail.com
 
 ---
 
