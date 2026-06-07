@@ -25,7 +25,7 @@ Telecom companies lose **15–25% of their subscriber base annually** to churn. 
 | Property | Value |
 |----------|-------|
 | Source | [IBM Telco Customer Churn — Kaggle](https://www.kaggle.com/datasets/blastchar/telco-customer-churn) |
-| Rows | 7,043 customers |
+| Rows | 7,043 raw → 7,032 modeled (11 rows with blank `TotalCharges` dropped) |
 | Features | 21 columns (demographics, services, billing) |
 | Target | `Churn` (Yes/No → encoded as 1/0) |
 | Imbalance | ~26.5% churn rate |
@@ -132,18 +132,18 @@ Two F1 scores are reported: **binary** (churn class only) and **weighted** (acro
 
 *Computed on 20% held-out test set, random seed 42. Authoritative values in `reports/model_metrics.json`.*
 
-> **On the F1 = 0.79 claim:** This corresponds to the weighted F1 metric (0.76–0.77 here), which
-> averages F1 across both Churned and Retained classes weighted by their support. The binary F1 for
-> the churn class alone (0.62) is the harder, more honest figure for an imbalanced dataset at 26.5%
-> positive rate. ROC-AUC of 0.84 is achieved as claimed.
+> **On F1 reporting:** The headline metric for this project is **ROC-AUC (0.84)**. For F1 we report
+> both the **weighted F1 (0.76)** — averaged across the Churned and Retained classes by their support —
+> and the **binary F1 for the churn class alone (0.62)**, the harder and more honest figure for an
+> imbalanced dataset at a 26.5% positive rate.
 
 ### Top 5 Churn Drivers
 
 | # | Feature | Business Insight |
 |---|---------|-----------------|
 | 1 | **Contract type** | Month-to-month customers churn at ~43% — 15× higher than two-year contracts. Contract upgrade programs are the single highest-leverage retention lever. |
-| 2 | **Tenure** | Customers in their first 12 months have 3× the churn rate of tenured customers. Early engagement and onboarding quality are critical. |
-| 3 | **Internet service** | Fiber optic customers churn at ~42% vs 7% for DSL — suggesting service quality or pricing dissatisfaction in the fiber segment. |
+| 2 | **Tenure** | Customers in their first 12 months churn at 47.7% — roughly 5× the 9.5% rate of customers with 4+ years tenure. Early engagement and onboarding quality are critical. |
+| 3 | **Internet service** | Fiber optic customers churn at ~42% — more than double DSL's 19% (and far above the 7% for customers with no internet) — suggesting service quality or pricing dissatisfaction in the fiber segment. |
 | 4 | **Online Security / Tech Support** | Customers without value-add services churn at 2× the rate. Bundling these services reduces churn and increases ARPU. |
 | 5 | **Payment method** | Electronic check users churn at 45% — auto-pay enrollment reduces churn by ~29 percentage points, and incentivizes stickiness. |
 
@@ -153,13 +153,16 @@ Two F1 scores are reported: **binary** (churn class only) and **weighted** (acro
 
 ### How the 15% Churn Reduction Projection is Calculated
 
-1. **Identify high-risk cohort:** ~1,200 customers with `risk_tier = 'High'` (predicted probability > 0.65), predominantly on month-to-month contracts.
-2. **Current monthly revenue loss:** This cohort generates ~$85,000/month in MonthlyCharges. At an assumed 30% actual churn rate for this tier, monthly revenue at risk ≈ $25,500.
+> ⚠️ **This is an illustrative projection** combining the model's risk scores with *assumed*
+> intervention response rates — not a measured business outcome.
+
+1. **Identify high-risk cohort:** **789 customers** flagged `risk_tier = 'High'` (predicted probability > 0.65), predominantly on month-to-month contracts.
+2. **Current monthly revenue:** This cohort generates **~$64,000/month** in MonthlyCharges. At an assumed 30% actual churn rate for this tier, monthly revenue at risk ≈ **$19,200**.
 3. **Intervention:** Proactive outreach offering:
    - Month-to-month → One-year contract at 10% discount
    - Auto-pay enrollment incentive ($5/month credit for 3 months)
 4. **Conversion rate:** 15% of approached customers accept (industry benchmark for targeted retention is 10–25%).
-5. **Monthly revenue saved:** $25,500 × 15% = **~$3,825/month** → **~$45,900/year**
+5. **Monthly revenue saved:** $19,200 × 15% = **~$2,880/month** → **~$34,560/year**
 
 **Retention actions ranked by ROI:**
 
@@ -174,17 +177,18 @@ Two F1 scores are reported: **binary** (churn class only) and **weighted** (acro
 
 ## Tableau Dashboard
 
-See [`tableau/README.md`](tableau/README.md) for complete step-by-step instructions to build the 5-sheet interactive dashboard.
+🔗 **[View the live interactive dashboard on Tableau Public →](https://public.tableau.com/app/profile/keshav.kashyap2970/viz/CustomerChurnPredictionRetentionDashboard/Dashboard1)**
 
-**Dashboard sheets:**
-1. Executive Summary KPIs (total customers, churn rate, revenue at risk)
-2. Churn by Contract & Tenure (stacked bar + heatmap)
-3. Revenue Impact Analysis (treemap + bar chart)
-4. Predictive Risk Segments (scatter plot with probability vs charges)
-5. Retention Strategy Dashboard (combined + global filters)
+[![Customer Churn Prediction & Retention Dashboard](reports/figures/tableau_dashboard.png)](https://public.tableau.com/app/profile/keshav.kashyap2970/viz/CustomerChurnPredictionRetentionDashboard/Dashboard1)
 
-> 🔗 **Live dashboard:** _Coming soon — Tableau Public link will be added here once published._
-> Add a screenshot to `reports/figures/` and embed it here after building the dashboard.
+An interactive dashboard built on the model's scored output (`data/tableau/churn_dashboard_data.csv`), featuring:
+
+1. **Executive KPI cards** — total customers, churn rate, average tenure, and monthly revenue at risk
+2. **Churn by Contract** — stacked bar showing month-to-month customers as the dominant churn segment
+3. **Tenure × Contract heatmap** — churn rate by cohort (month-to-month, 0–12 months peaks at ~51%)
+4. **Predictive Risk Scatter** — every customer plotted by XGBoost-predicted churn probability vs. monthly charges, colored by actual churn, with risk-tier boundaries at 0.35 and 0.65
+
+See [`tableau/README.md`](tableau/README.md) for the step-by-step build guide (calculated fields, each sheet, and layout).
 
 ---
 
