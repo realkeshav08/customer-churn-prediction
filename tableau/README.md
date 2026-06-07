@@ -3,6 +3,12 @@
 ## Data Source
 Connect to `data/tableau/churn_dashboard_data.csv`.
 
+> ⚠️ **Field names are exactly as in the CSV header — no spaces, original casing:**
+> `MonthlyCharges`, `TotalCharges`, `InternetService`, `predicted_churn_probability`,
+> `risk_tier`, `tenure_group`, `clv`, `Churn`, `Contract`, `SeniorCitizen`, etc.
+> There is **no `Customer ID` column** (it was dropped in preprocessing). Each row =
+> one customer, so to count customers use `COUNT([Churn])` (counts all non-null rows).
+
 Key columns you'll use:
 | Column | Type | Description |
 |--------|------|-------------|
@@ -26,13 +32,13 @@ IF [Churn] = 1 THEN "Churned" ELSE "Retained" END
 
 ### 2. `Churn Rate`
 ```
-SUM([Churn]) / COUNT([Customer ID])
+SUM([Churn]) / COUNT([Churn])
 ```
 *Format as Percentage (1 decimal place)*
 
 ### 3. `Monthly Revenue at Risk`
 ```
-IF [Churn] = 1 THEN [Monthly Charges] ELSE 0 END
+IF [Churn] = 1 THEN [MonthlyCharges] ELSE 0 END
 ```
 
 ### 4. `Projected Revenue Saved (15%)`
@@ -42,15 +48,16 @@ SUM([Monthly Revenue at Risk]) * 0.15
 
 ### 5. `Risk Score Label`
 ```
-IF [Predicted Churn Probability] >= 0.65 THEN "🔴 High Risk"
-ELSEIF [Predicted Churn Probability] >= 0.35 THEN "🟡 Medium Risk"
+IF [predicted_churn_probability] >= 0.65 THEN "🔴 High Risk"
+ELSEIF [predicted_churn_probability] >= 0.35 THEN "🟡 Medium Risk"
 ELSE "🟢 Low Risk"
 END
 ```
+*(Or just use the ready-made `risk_tier` field, which already holds High/Medium/Low.)*
 
 ### 6. `Total Monthly Revenue`
 ```
-SUM([Monthly Charges])
+SUM([MonthlyCharges])
 ```
 
 ---
@@ -61,7 +68,7 @@ SUM([Monthly Charges])
 
 **Steps:**
 1. Create 4 KPI cards using Tableau's Show Me > Text Table
-2. **KPI 1 — Total Customers:** Drag `Customer ID` to Text → COUNT
+2. **KPI 1 — Total Customers:** Drag `Churn` to Text → set aggregation to COUNT
 3. **KPI 2 — Churn Rate:** Drag `Churn Rate` calculated field → format as %
 4. **KPI 3 — Avg Tenure:** Drag `tenure` to Text → AVG
 5. **KPI 4 — Monthly Revenue at Risk:** Drag `Monthly Revenue at Risk` → SUM → format as currency
@@ -77,7 +84,7 @@ SUM([Monthly Charges])
 ### 2a: Stacked Bar — Contract Type vs Churn Count
 
 1. Drag `Contract` to **Columns**
-2. Drag `Count of Rows` (CNTD Customer ID) to **Rows**
+2. Drag `Churn` to **Rows**, then set its aggregation to **COUNT** (counts customers per bar)
 3. Drag `Churn Flag` to **Color**
 4. Sort: Month-to-month first
 5. Colors: Churned = `#FF9800` (orange), Retained = `#2196F3` (blue)
@@ -101,18 +108,18 @@ SUM([Monthly Charges])
 
 1. Create a calculated field `Service Bundle`:
    ```
-   [Internet Service] + " | " + [Contract]
+   [InternetService] + " | " + [Contract]
    ```
 2. Change Mark type to **Square**
 3. Drag `Service Bundle` to **Color** and **Label**
 4. Drag `Monthly Revenue at Risk` (SUM) to **Size**
-5. Add `COUNT([Customer ID])` to **Label**
+5. Add `COUNT([Churn])` to **Label** (customer count per bundle)
 
 ### 3b: Bar Chart — Monthly Revenue Lost by Segment
 
 1. Drag `Contract` to **Columns**
 2. Drag `Monthly Revenue at Risk` (SUM) to **Rows**
-3. Drag `Internet Service` to **Color**
+3. Drag `InternetService` to **Color**
 4. Sort descending by revenue
 5. Add labels showing dollar amounts
 
@@ -122,8 +129,8 @@ SUM([Monthly Charges])
 
 ### Scatter Plot: Predicted Probability vs Monthly Charges
 
-1. Drag `Predicted Churn Probability` to **Columns** (AVG or as-is)
-2. Drag `Monthly Charges` to **Rows** (AVG)
+1. Drag `predicted_churn_probability` to **Columns** (set to a dimension / disaggregate so each customer is a point)
+2. Drag `MonthlyCharges` to **Rows** (disaggregate — uncheck Aggregate Measures under Analysis menu)
 3. Change Mark type to **Circle**
 4. Drag `Churn Flag` to **Color**
    - Churned = `#FF5722` (red-orange), Retained = `#4CAF50` (green)
@@ -160,7 +167,7 @@ SUM([Monthly Charges])
 
 **Dashboard Filters (apply to all sheets):**
 1. Add `Contract` as a global filter
-2. Add `Internet Service` as a global filter
+2. Add `InternetService` as a global filter
 3. Add `SeniorCitizen` as a global filter
 4. Right-click each filter → Apply to All Worksheets Using Related Data Sources
 
